@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>PigeonTrack - Autentificare</title>
+<meta name="theme-color" content="#1e4e78" />
+<link rel="manifest" href="/manifest.json" />
+<link rel="icon" href="/icons/favicon-32.png" sizes="32x32" />
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+<link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+<div class="login-page">
+  <div class="login-card">
+    <img src="/icons/icon-192.png" alt="" />
+    <h1 id="lp-title">Se incarca...</h1>
+    <p class="sub" id="lp-sub"></p>
+    <div id="lp-error" class="login-error" hidden></div>
+    <form id="lp-form">
+      <div class="field">
+        <label for="lp-username">Utilizator</label>
+        <input id="lp-username" name="username" autocomplete="username" required />
+      </div>
+      <div class="field">
+        <label for="lp-password">Parola</label>
+        <input id="lp-password" name="password" type="password" autocomplete="current-password" required minlength="6" />
+      </div>
+      <div class="field" id="lp-confirm-wrap" hidden>
+        <label for="lp-password2">Confirma parola</label>
+        <input id="lp-password2" name="password2" type="password" autocomplete="new-password" minlength="6" />
+      </div>
+      <button type="submit" class="btn" style="width:100%" id="lp-submit">Intra in cont</button>
+    </form>
+  </div>
+</div>
+<script type="module" src="/js/login.js"></script>
+</body>
+</html>
