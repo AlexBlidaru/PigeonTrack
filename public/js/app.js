@@ -32,7 +32,7 @@ function buildNav() {
     (r) => `<li><a href="${r.hash}" class="nav-item" data-hash="${r.hash}">${r.icon}<span>${r.title}</span></a></li>`
   ).join("");
   bottomNavList.innerHTML = ROUTES.map(
-    (r) => `<li><a href="${r.hash}" data-hash="${r.hash}">${r.icon}<span>${r.title.split(" ")[0]}</span></a></li>`
+    (r) => `<li><a href="${r.hash}" data-hash="${r.hash}"><span class="bn-icon">${r.icon}</span><span class="bn-label">${r.title.split(" ")[0]}</span></a></li>`
   ).join("");
 }
 
