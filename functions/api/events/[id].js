@@ -19,7 +19,7 @@ export async function onRequestGet(context) {
   if (!event) return errorJson("Evenimentul nu a fost gasit", 404);
 
   const { results } = await env.DB.prepare(
-    `SELECT ep.*, p.name AS pigeon_name, p.ring_number, p.photo_key
+    `SELECT ep.*, p.name AS pigeon_name, p.ring_number
      FROM event_participants ep JOIN pigeons p ON p.id = ep.pigeon_id
      WHERE ep.event_id = ?
      ORDER BY (ep.rank_position IS NULL), ep.rank_position ASC`

@@ -2,7 +2,7 @@ import { json, errorJson } from "../../_lib/auth.js";
 
 const FIELDS = [
   "name", "species", "sex", "ring_number", "color", "hatch_date",
-  "cost", "health_status", "notes", "photo_key", "category_id",
+  "cost", "health_status", "notes", "photo_data", "category_id",
   "father_id", "mother_id", "status",
 ];
 

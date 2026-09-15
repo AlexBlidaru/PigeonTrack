@@ -83,44 +83,49 @@ export function openModal({ title, bodyHtml, footerHtml }) {
   return overlay;
 }
 
-// Compresses/resizes an image file client-side before upload so we never
-// ship huge photos to Cloudflare (keeps well under the 7MB server cap).
-export function compressImage(file, { maxDimension = 1600, quality = 0.82, maxBytes = 6.5 * 1024 * 1024 } = {}) {
+// Compresses/resizes an image file client-side and returns a data: URL ready
+// to store straight in the pigeon record (photos live in D1, not R2 - the
+// user opted out of R2 since it requires a card on file even on the free
+// tier). Shrinks dimensions too, not just quality, so we reliably land under
+// maxBytes instead of just approximating it.
+export function compressImage(file, { maxDimension = 1000, quality = 0.75, maxBytes = 260 * 1024 } = {}) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const reader = new FileReader();
     reader.onerror = () => reject(new Error("Nu am putut citi fisierul"));
     reader.onload = () => {
       img.onload = () => {
-        let { width, height } = img;
-        if (width > maxDimension || height > maxDimension) {
-          const scale = maxDimension / Math.max(width, height);
-          width = Math.round(width * scale);
-          height = Math.round(height * scale);
-        }
         const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
         const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
 
-        let q = quality;
-        const tryEncode = () => {
-          canvas.toBlob(
-            (blob) => {
-              if (!blob) return reject(new Error("Nu am putut procesa imaginea"));
-              if (blob.size > maxBytes && q > 0.35) {
-                q -= 0.12;
-                tryEncode();
-              } else {
-                resolve(new File([blob], (file.name || "poza").replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" }));
-              }
-            },
-            "image/jpeg",
-            q
-          );
-        };
-        tryEncode();
+        const encodeAt = (dimension, q) =>
+          new Promise((res) => {
+            let { width, height } = img;
+            if (width > dimension || height > dimension) {
+              const scale = dimension / Math.max(width, height);
+              width = Math.round(width * scale);
+              height = Math.round(height * scale);
+            }
+            canvas.width = width;
+            canvas.height = height;
+            ctx.clearRect(0, 0, width, height);
+            ctx.drawImage(img, 0, 0, width, height);
+            res(canvas.toDataURL("image/jpeg", q));
+          });
+
+        (async () => {
+          let dimension = maxDimension;
+          let q = quality;
+          let dataUrl = await encodeAt(dimension, q);
+          let attempts = 0;
+          while (dataUrl.length > maxBytes * 1.37 && attempts < 8) {
+            if (q > 0.4) q -= 0.12;
+            else dimension = Math.round(dimension * 0.85);
+            dataUrl = await encodeAt(dimension, q);
+            attempts++;
+          }
+          resolve(dataUrl);
+        })().catch(reject);
       };
       img.onerror = () => reject(new Error("Fisierul nu este o imagine valida"));
       img.src = reader.result;

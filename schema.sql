@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS pigeons (
   cost REAL,
   health_status TEXT,
   notes TEXT,
-  photo_key TEXT,
+  photo_data TEXT,
   category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
   father_id INTEGER REFERENCES pigeons(id) ON DELETE SET NULL,
   mother_id INTEGER REFERENCES pigeons(id) ON DELETE SET NULL,

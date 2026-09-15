@@ -1,4 +1,4 @@
-import { api, photoUrl } from "../api.js";
+import { api } from "../api.js";
 import { fmtDate, fmtMoney, esc, ICONS } from "../utils.js";
 
 export async function renderDashboard(root) {
@@ -59,7 +59,7 @@ export async function renderDashboard(root) {
             .slice(0, 4)
             .map(
               (p) => `<div style="display:flex;align-items:center;gap:10px;">
-                <img src="${photoUrl(p.photo_key) || "/icons/icon-192.png"}" style="width:36px;height:36px;border-radius:8px;object-fit:cover" />
+                <img src="${p.photo_data || "/icons/icon-192.png"}" style="width:36px;height:36px;border-radius:8px;object-fit:cover" />
                 <div><div style="font-weight:600">${esc(p.name || p.ring_number || "Fara nume")}</div>
                 <div style="font-size:0.78rem;color:var(--color-text-muted)">${esc(p.ring_number || "")}</div></div>
               </div>`

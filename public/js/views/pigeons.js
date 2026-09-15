@@ -1,4 +1,4 @@
-import { api, photoUrl } from "../api.js";
+import { api } from "../api.js";
 import { fmtDate, fmtMoney, esc, toast, confirmDialog, openModal, compressImage, ICONS, PIGEON_STATUSES } from "../utils.js";
 
 let cachedPigeons = null;
@@ -83,7 +83,7 @@ async function renderList(root) {
       .map(
         (p) => `
       <div class="pigeon-card" data-id="${p.id}">
-        ${p.photo_key ? `<img class="photo" src="${photoUrl(p.photo_key)}" alt="" />` : `<div class="photo placeholder">${ICONS.pigeon}</div>`}
+        ${p.photo_data ? `<img class="photo" src="${p.photo_data}" alt="" />` : `<div class="photo placeholder">${ICONS.pigeon}</div>`}
         <div class="body">
           <div class="name">${esc(p.name || "Fara nume")}</div>
           <div class="meta">${esc(p.species || "-")} ${p.ring_number ? "&middot; " + esc(p.ring_number) : ""}</div>
@@ -135,7 +135,7 @@ async function renderDetail(root, id) {
 
     <div class="detail-grid">
       <div>
-        <img class="detail-photo" src="${photoUrl(pigeon.photo_key) || "/icons/icon-512.png"}" alt="" />
+        <img class="detail-photo" src="${pigeon.photo_data || "/icons/icon-512.png"}" alt="" />
         <div class="kv-list">
           <div class="kv"><span>Specie</span><span>${esc(pigeon.species || "-")}</span></div>
           <div class="kv"><span>Sex</span><span>${esc(pigeon.sex || "-")}</span></div>
@@ -202,7 +202,7 @@ export async function openPigeonForm(existing, onDone) {
     bodyHtml: `
       <form id="pigeon-form">
         <div class="photo-upload field">
-          <img class="preview" id="pf-preview" src="${existing && existing.photo_key ? photoUrl(existing.photo_key) : "/icons/icon-192.png"}" />
+          <img class="preview" id="pf-preview" src="${existing && existing.photo_data ? existing.photo_data : "/icons/icon-192.png"}" />
           <div>
             <input type="file" id="pf-photo" accept="image/*" />
             <div class="hint">Poza este redimensionata si comprimata automat inainte de incarcare.</div>
@@ -252,14 +252,13 @@ export async function openPigeonForm(existing, onDone) {
     footerHtml: `<button class="btn secondary" data-close-modal type="button">Anuleaza</button><button class="btn" id="pf-save">Salveaza</button>`,
   });
 
-  let pendingPhotoFile = null;
+  let pendingPhotoData = null;
   overlay.querySelector("#pf-photo").addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     try {
-      const compressed = await compressImage(file);
-      pendingPhotoFile = compressed;
-      overlay.querySelector("#pf-preview").src = URL.createObjectURL(compressed);
+      pendingPhotoData = await compressImage(file);
+      overlay.querySelector("#pf-preview").src = pendingPhotoData;
     } catch (err) {
       toast(err.message, "error");
     }
@@ -270,11 +269,7 @@ export async function openPigeonForm(existing, onDone) {
     saveBtn.disabled = true;
     saveBtn.textContent = "Se salveaza...";
     try {
-      let photo_key = existing?.photo_key || null;
-      if (pendingPhotoFile) {
-        const uploaded = await api.uploadPhoto(pendingPhotoFile);
-        photo_key = uploaded.key;
-      }
+      const photo_data = pendingPhotoData || existing?.photo_data || null;
       const payload = {
         name: overlay.querySelector("#pf-name").value.trim(),
         species: overlay.querySelector("#pf-species").value.trim(),
@@ -289,7 +284,7 @@ export async function openPigeonForm(existing, onDone) {
         father_id: overlay.querySelector("#pf-father").value || null,
         mother_id: overlay.querySelector("#pf-mother").value || null,
         notes: overlay.querySelector("#pf-notes").value.trim(),
-        photo_key,
+        photo_data,
       };
       if (existing) await api.updatePigeon(existing.id, payload);
       else await api.createPigeon(payload);

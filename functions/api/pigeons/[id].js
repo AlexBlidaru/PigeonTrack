@@ -2,7 +2,7 @@ import { json, errorJson } from "../../_lib/auth.js";
 
 const FIELDS = [
   "name", "species", "sex", "ring_number", "color", "hatch_date",
-  "cost", "health_status", "notes", "photo_key", "category_id",
+  "cost", "health_status", "notes", "photo_data", "category_id",
   "father_id", "mother_id", "status",
 ];
 
@@ -63,15 +63,8 @@ export async function onRequestPut(context) {
 
 export async function onRequestDelete(context) {
   const { env, params } = context;
-  const row = await env.DB.prepare("SELECT photo_key FROM pigeons WHERE id = ?").bind(params.id).first();
+  const row = await env.DB.prepare("SELECT id FROM pigeons WHERE id = ?").bind(params.id).first();
   if (!row) return errorJson("Porumbelul nu a fost gasit", 404);
   await env.DB.prepare("DELETE FROM pigeons WHERE id = ?").bind(params.id).run();
-  if (row.photo_key) {
-    try {
-      await env.PHOTOS.delete(row.photo_key);
-    } catch {
-      // ignore storage cleanup failures
-    }
-  }
   return json({ ok: true });
 }

@@ -41,13 +41,6 @@ export const api = {
   updateParticipant: (eventId, pid, data) => request(`/api/events/${eventId}/participants/${pid}`, { method: "PUT", body: JSON.stringify(data) }),
   removeParticipant: (eventId, pid) => request(`/api/events/${eventId}/participants/${pid}`, { method: "DELETE" }),
 
-  // photos
-  uploadPhoto: (file) => {
-    const form = new FormData();
-    form.append("photo", file);
-    return request("/api/photos/upload", { method: "POST", body: form });
-  },
-
   // settings
   getSettings: () => request("/api/settings"),
   saveSettings: (data) => request("/api/settings", { method: "PUT", body: JSON.stringify(data) }),
@@ -60,7 +53,3 @@ export const api = {
   logout: () => request("/api/auth/logout", { method: "POST" }),
   changePassword: (data) => request("/api/auth/change-password", { method: "POST", body: JSON.stringify(data) }),
 };
-
-export function photoUrl(key) {
-  return key ? `/api/photos/${key}` : null;
-}
